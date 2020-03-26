@@ -16,7 +16,7 @@ module Facter
 
     def load(options)
       @internal_loader ||= InternalFactLoader.new
-      @external_fact_loader ||= ExternalFactLoader.new
+      @external_fact_loader = ExternalFactLoader.new
 
       @facts = []
       @external_facts = []

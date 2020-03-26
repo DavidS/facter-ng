@@ -142,3 +142,9 @@ RSpec/DescribedClass:
 
 RSpec/NestedGroups:
   Max: 5
+
+Style/ModuleFunction:
+  Enabled: false
+
+Style/Attr:
+  Enabled: false

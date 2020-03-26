@@ -53,4 +53,21 @@ RSpec.configure do |config|
     # exist to raise, protecting against incorrectly spelt names.
     mocks.verify_doubled_constant_names = true
   end
+
+  def default_path
+    os = OsDetector.instance.identifier
+
+    windows_path = File.join('C:', 'ProgramData', 'PuppetLabs', 'facter', 'etc', 'facter.conf')
+    linux_path = File.join('/', 'etc', 'puppetlabs', 'facter', 'facter.conf')
+
+    os == :windows ? windows_path : linux_path
+  end
+
+  config.before do
+
+  end
+
+  config.after do
+    # Facter::Options.reset!
+  end
 end
