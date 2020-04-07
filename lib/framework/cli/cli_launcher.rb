@@ -8,7 +8,7 @@ Facter::Log.add_legacy_logger(STDERR)
 require "#{ROOT_DIR}/lib/facter"
 require "#{ROOT_DIR}/lib/framework/cli/cli"
 
-Facter::OptionsValidator.validate(ARGV)
+# Facter::OptionsValidator.validate(ARGV)
 ARGV.unshift(Facter::Cli.default_task) unless
   Facter::Cli.all_tasks.key?(ARGV[0]) ||
   Facter::Cli.instance_variable_get(:@map).key?(ARGV[0])

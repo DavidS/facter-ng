@@ -2,51 +2,58 @@
 
 module Facter
   class Options
-    include Facter::DefaultOptions
+    # include Facter::DefaultOptions
     include Facter::ConfigFileOptions
-    include Facter::PriorityOptions
-    include Facter::HelperOptions
+    # include Facter::PriorityOptions
+    # include Facter::HelperOptions
     include Facter::ValidateOptions
 
     include Singleton
 
-    attr_accessor :priority_options
+    # attr_accessor :priority_options
 
     def initialize
-      @options = {}
-      @priority_options = {}
+      # @options = {}
+      # @priority_options = {}
+      @option_store = OptionStore.new
+      augment_with_config_file_options!
     end
 
-    def refresh(user_query = [])
-      @user_query = user_query
-      initialize_options
-
-      @options
-    end
+    # def refresh(user_query = [])
+    #   @user_query = user_query
+    #   initialize_options
+    #
+    #   @options
+    # end
 
     def get
-      @options
+      @option_store
     end
 
-    def [](option)
-      @options.fetch(option, nil)
+    def set_option(name, value)
+      @option_store.send("#{name}=".to_sym, value)
     end
 
-    def custom_dir?
-      @options[:custom_dir] && @options[:custom_facts]
+    def get_option(name)
+      @option_store.send(name.to_sym)
     end
 
-    def custom_dir
-      @options[:custom_dir]
-    end
 
-    def external_dir?
-      @options[:external_dir] && @options[:external_facts]
-    end
-
-    def external_dir
-      @options[:external_dir]
-    end
+    # def custom_dir?
+    #   @options[:custom_dir] && @options[:custom_facts]
+    # end
+    #
+    # def custom_dir
+    #   @options[:custom_dir]
+    # end
+    #
+    # def external_dir?
+    #   @options[:external_dir] && @options[:external_facts]
+    # end
+    #
+    # def external_dir
+    #   @options[:external_dir]
+    # end
 
     def self.method_missing(name, *args, &block)
       Facter::Options.instance.send(name.to_s, *args, &block)
@@ -58,14 +65,14 @@ module Facter
 
     private
 
-    def initialize_options
-      @options = { config: @priority_options[:config] }
-      augment_with_defaults!
-      augment_with_to_hash_defaults! if @priority_options[:to_hash]
-      augment_with_config_file_options!(@options[:config])
-      augment_with_priority_options!(@priority_options)
-      validate_configs
-      augment_with_helper_options!(@user_query)
-    end
+    # def initialize_options
+    #   @options = { config: @priority_options[:config] }
+    #   augment_with_defaults!
+    #   augment_with_to_hash_defaults! if @priority_options[:to_hash]
+    #   augment_with_config_file_options!(@options[:config])
+    #   augment_with_priority_options!(@priority_options)
+    #   validate_configs
+    #   augment_with_helper_options!(@user_query)
+    # end
   end
 end

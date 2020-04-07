@@ -187,8 +187,10 @@ module Facter
     #
     # @api public
     def to_hash
-      @options.priority_options[:to_hash] = true
-      @options.refresh
+      # @options.priority_options[:to_hash] = true
+      # @options.refresh
+
+      @options.set(:to_hash, true)
 
       log_blocked_facts
 
@@ -244,9 +246,12 @@ module Facter
     #
     # @api private
     def to_user_output(cli_options, *args)
-      @options.priority_options = { is_cli: true }.merge!(cli_options.map { |(k, v)| [k.to_sym, v] }.to_h)
-      @options.refresh(args)
+      # @options.priority_options = { is_cli: true }.merge!(cli_options.map { |(k, v)| [k.to_sym, v] }.to_h)
+      # @options.refresh(args)
       @logger.info("executed with command line: #{ARGV.drop(1).join(' ')}")
+
+      @options.set_option(:is_cli, true)
+
       log_blocked_facts
 
       resolved_facts = Facter::FactManager.instance.resolve_facts(args)
