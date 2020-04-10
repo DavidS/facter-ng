@@ -36,6 +36,7 @@ module Facter
       end
 
       def init
+        ConfigFileOptions.init
         OptionStore.cli = false
         store(ConfigFileOptions.get)
       end

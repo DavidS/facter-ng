@@ -11,7 +11,6 @@ require "#{ROOT_DIR}/lib/framework/core/options/options_validator"
 module Facter
   class ResolveCustomFactError < StandardError; end
 
-  ConfigReader.init
   Options.init
   Log.add_legacy_logger(STDOUT)
   @logger = Log.new(self)

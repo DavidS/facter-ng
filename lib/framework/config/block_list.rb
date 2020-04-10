@@ -25,10 +25,8 @@ module Facter
     private
 
     def load_block_groups
-require 'pry-byebug'; binding.pry
-
       @block_groups = File.readable?(@block_groups_file_path) ? Hocon.load(@block_groups_file_path) : {}
-      @block_list = ConfigReader.init(Options[:config]).block_list || {}
+      @block_list = ConfigReader.block_list || {}
     end
   end
 end
