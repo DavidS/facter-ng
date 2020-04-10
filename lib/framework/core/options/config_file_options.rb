@@ -5,18 +5,18 @@ module Facter
     class << self
       def init(config_path = nil)
         @options = {}
-        conf_reader = Facter::ConfigReader.init(config_path)
+        Facter::ConfigReader.init(config_path)
 
         augment_config_path(config_path)
 
         if Options.cli?
-          augment_cli(conf_reader.cli)
-          augment_ruby(conf_reader.global)
+          augment_cli(Facter::ConfigReader.cli)
+          augment_ruby(Facter::ConfigReader.global)
         end
-        augment_custom(conf_reader.global)
-        augment_external(conf_reader.global)
-        augment_show_legacy(conf_reader.global)
-        augment_facts(conf_reader.ttls, config_path)
+        augment_custom(Facter::ConfigReader.global)
+        augment_external(Facter::ConfigReader.global)
+        augment_show_legacy(Facter::ConfigReader.global)
+        augment_facts(Facter::ConfigReader.ttls, config_path)
       end
 
       def get

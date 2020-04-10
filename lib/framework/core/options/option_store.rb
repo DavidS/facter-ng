@@ -20,12 +20,21 @@ module Facter
       @user_query = []
 
     class << self
-
       attr_reader :debug, :verbose, :log_level, :show_legacy, :trace,
-                  :custom_dir, :external_dir, :external_facts, :ruby, :cli,
-                  :custom_facts
-      attr_accessor :config, :user_query, :blocked_facts, :strict, :json, :haml,
-                    :cache, :yaml, :puppet, :ttls, :external_facts, :block
+                  :custom_dir, :external_dir, :external_facts, :ruby,
+                  :custom_facts, :blocked_facts
+
+      attr_accessor :config, :user_query, :strict, :json, :haml,
+                    :cache, :yaml, :puppet, :ttls, :external_facts, :block, :cli
+
+      def get_all
+        options = {}
+        self.instance_variables.each do |iv|
+          variable_name = iv.to_s.delete('@')
+          options[variable_name.to_sym] = OptionStore.send(variable_name.to_sym)
+        end
+        options
+      end
 
       def ruby=(bool)
         if bool == true
@@ -122,8 +131,8 @@ module Facter
         end
       end
 
-      def cli=(bool)
-        @cli = bool
+      def set(key, value)
+         send("#{key}=".to_sym, value)
       end
     end
   end

@@ -8,12 +8,7 @@ module Facter
       end
 
       def get
-        options = {}
-        OptionStore.instance_variables.each do |iv|
-          variable_name = iv.to_s.delete('@')
-          options[variable_name.to_sym] = OptionStore.send(variable_name.to_sym)
-        end
-        options
+        OptionStore.get_all
       end
 
       def [](key)
@@ -58,9 +53,9 @@ module Facter
       end
 
       def store(options)
-        options.each do |key, val|
-          val = '' if key == 'log_level' && val == 'log_level'
-          OptionStore.send("#{key}=".to_sym, val)
+        options.each do |key, value|
+          value = '' if key == 'log_level' && value == 'log_level'
+          OptionStore.set(key, value)
         end
       end
     end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 describe Facter::Options do
+  subject(:options) { Facter::Options }
+
   describe '#defaults' do
     it 'sets debug to false' do
       expect(Facter::Options[:debug]).to be_falsey
@@ -36,143 +38,107 @@ describe Facter::Options do
   end
 
   describe '#init_from_cli' do
-    context 'with defaults' do
-      let(:option_store) { class_spy(Facter::OptionStore).as_stubbed_const }
+    let(:option_store) { class_spy('Facter::OptionStore') }
+    let(:config_file_options) { class_spy('Facter::ConfigFileOptions') }
+    let(:options_validator) { class_spy('Facter::OptionsValidator') }
 
-      # before do
-      #   allow(option_store).to receive(:cli=)
-      # end
+    before do
+      stub_const('Facter::ConfigFileOptions', config_file_options)
+      stub_const('Facter::OptionStore', option_store)
+      stub_const('Facter::OptionsValidator', options_validator)
+      allow(config_file_options).to receive(:get).and_return({})
+    end
 
-      it 'calls OptionStore with cli' do
-        Facter::Options.init_from_cli
+    it 'calls OptionStore with cli' do
+      Facter::Options.init_from_cli
 
-        expect(option_store).to have_received(:cli=).with(true)
+      expect(option_store).to have_received(:cli=).with(true)
+    end
+
+    it 'calls OptionStore with show_legacy' do
+      Facter::Options.init_from_cli
+
+      expect(option_store).to have_received(:show_legacy=).with(false)
+    end
+
+    context 'with user_query' do
+      it 'calls OptionStore with user_query when sent' do
+        Facter::Options.init_from_cli({}, 'os')
+
+        expect(option_store).to have_received(:user_query=).with('os')
       end
 
-      it 'calls OptionStore with show_legacy' do
+      it 'calls OptionStore with user_query with nil' do
         Facter::Options.init_from_cli
 
-        expect(option_store).to have_received(:show_legacy=).with(false)
+        expect(option_store).to have_received(:user_query=).with(nil)
+      end
+    end
+
+    context 'with config_file' do
+      let(:config_file_opts) { { 'debug' => true, 'ruby' => true } }
+
+      before do
+        allow(config_file_options).to receive(:get).and_return(config_file_opts)
+      end
+
+      it 'calls ConfigFileOptions.init with config_path' do
+        Facter::Options.init_from_cli(config: 'path/to/config')
+
+        expect(config_file_options).to have_received(:init).with('path/to/config')
+      end
+
+      it 'calls OptionStore.set.init with cli_options' do
+        Facter::Options.init_from_cli
+
+        config_file_opts.each do |key, value|
+          expect(option_store).to have_received(:set).with(key, value)
+        end
+      end
+    end
+
+    context 'with cli_options' do
+      let(:cli_options) { { 'debug' => true, 'ruby' => true, 'log_level' => 'log_level' } }
+
+      it 'calls OptionStore.set.init with cli_options' do
+        Facter::Options.init_from_cli(cli_options)
+
+        cli_options.each do |key, value|
+          value = '' if key == 'log_level' && value == 'log_level'
+          expect(option_store).to have_received(:set).with(key, value)
+        end
       end
     end
   end
 
   describe '#init' do
-    let(:config_reader_double) { double(Facter::ConfigReader) }
-    let(:block_list_double) { double(Facter::BlockList) }
+    let(:option_store) { class_spy('Facter::OptionStore') }
+    let(:config_file_options) { class_spy('Facter::ConfigFileOptions') }
 
     before do
-      allow(Facter::ConfigReader).to receive(:new).and_return(config_reader_double)
-      allow(config_reader_double).to receive(:cli).and_return(nil)
-
-      allow(config_reader_double).to receive(:global).and_return(nil)
-      allow(config_reader_double).to receive(:ttls).and_return([])
-
-      allow(Facter::BlockList).to receive(:instance).and_return(block_list_double)
-      allow(block_list_double).to receive(:blocked_facts).and_return([])
+      stub_const('Facter::ConfigFileOptions', config_file_options)
+      stub_const('Facter::OptionStore', option_store)
+      allow(config_file_options).to receive(:get).and_return({})
     end
 
-    context 'when defaults are overridden only by config file global options' do
-      it 'sets debug to true' do
-        allow(config_reader_double).to receive(:cli).and_return(
-          'debug' => true
-        )
+    it 'calls OptionStore with cli' do
+      Facter::Options.init
 
+      expect(option_store).to have_received(:cli=).with(false)
+    end
+
+    context 'with config_file' do
+      let(:config_file_opts) { { 'debug' => true, 'ruby' => true } }
+
+      before do
+        allow(config_file_options).to receive(:get).and_return(config_file_opts)
+      end
+
+      it 'calls OptionStore.set.init with cli_options' do
         Facter::Options.init
 
-        expect(Facter::Options[:debug]).to be_falsey
-      end
-
-      it 'sets trace to true' do
-        allow(config_reader_double).to receive(:cli).and_return(
-          'trace' => true
-        )
-
-        Facter::Options.init
-
-        expect(Facter::Options[:trace]).to be_falsey
-      end
-
-      it 'sets verbose to true' do
-        allow(config_reader_double).to receive(:cli).and_return(
-          'verbose' => true
-        )
-
-        Facter::Options.init
-
-        expect(Facter::Options[:verbose]).to be_falsey
-      end
-
-      it 'sets logs level to debug' do
-        allow(config_reader_double).to receive(:cli).and_return(
-          'log-level' => :warn
-        )
-
-        Facter::Options.init
-
-        expect(Facter::Options[:log_level]).to eq(:warn)
-      end
-
-      it 'sets show_legacy to true' do
-        allow(config_reader_double).to receive(:global).and_return(
-          'show-legacy' => true
-        )
-        Facter::Options.init
-
-        expect(Facter::Options[:show_legacy]).to be_truthy
-      end
-
-      it 'sets blocked_facts' do
-        allow(block_list_double).to receive(:blocked_facts).and_return(%w[block_fact1 blocked_fact2])
-
-        Facter::Options.init
-
-        expect(Facter::Options[:blocked_facts]).to eq(%w[block_fact1 blocked_fact2])
-      end
-
-      it 'sets ttls' do
-        allow(config_reader_double).to receive(:ttls).and_return([{ 'timezone' => '30 days' }])
-
-        Facter::Options.init
-
-        expect(Facter::Options[:ttls]).to eq([{ 'timezone' => '30 days' }])
-      end
-
-      context 'when custom facts' do
-        before do
-          allow(config_reader_double).to receive(:global).and_return(
-            'custom-dir' => %w[custom_dir1 custom_dir2]
-          )
-          Facter::Options.init
-        end
-
-        it 'sets custom-facts to true' do
-          expect(Facter::Options[:custom_facts]).to be_truthy
-        end
-
-        it 'sets custom-dir' do
-          expect(Facter::Options[:custom_dir]).to eq(%w[custom_dir1 custom_dir2])
-        end
-
-        it 'sets ruby to true' do
-          expect(Facter::Options[:ruby]).to be_truthy
-        end
-      end
-
-      context 'when external facts' do
-        before do
-          allow(config_reader_double).to receive(:global).and_return(
-            'no-external-facts' => false, 'external-dir' => %w[external_dir1 external_dir2]
-          )
-          Facter::Options.init
-        end
-
-        it 'sets external-dir' do
-          expect(Facter::Options[:external_dir]).to eq(%w[external_dir1 external_dir2])
-        end
-
-        it 'sets external-facts to true' do
-          expect(Facter::Options[:external_facts]).to be_truthy
+        config_file_opts.each do |key, value|
+          expect(option_store).to have_received(:set).with(key, value)
         end
       end
     end

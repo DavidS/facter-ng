@@ -10,7 +10,7 @@ module Facter
         config_path ||= default_path
         refresh_config(config_path)
         #TODO: remove this and call directly ConfigReader
-        self
+        # self
       end
 
       def block_list
