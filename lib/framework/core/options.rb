@@ -46,9 +46,9 @@ module Facter
       end
 
       def init_from_cli(cli_options = {}, user_query = nil)
-        OptionStore.cli = true
-        OptionStore.show_legacy = false
-        OptionStore.user_query = user_query
+        Facter::OptionStore.cli = true
+        Facter::OptionStore.show_legacy = false
+        Facter::OptionStore.user_query = user_query
 
         ConfigFileOptions.init(cli_options[:config])
         store(ConfigFileOptions.get)
