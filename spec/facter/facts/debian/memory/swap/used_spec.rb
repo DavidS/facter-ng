@@ -10,7 +10,7 @@ describe Facts::Debian::Memory::Swap::Used do
     before do
       allow(Facter::Resolvers::Linux::Memory).to \
         receive(:resolve).with(:swap_used_bytes).and_return(resolver_value)
-      allow(Facter::BytesToHumanReadable).to receive(:convert).with(resolver_value).and_return(value)
+      allow(Facter::FactsUtils::Converter).to receive(:bytes_to_human_readable).with(resolver_value).and_return(value)
     end
 
     it 'calls Facter::Resolvers::Linux::Memory' do
