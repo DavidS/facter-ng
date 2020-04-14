@@ -14,7 +14,7 @@ describe Facts::Debian::Os::Release do
 
       context 'when version_id is retrieved successful' do
         let(:value) { '18.04' }
-        let(:value_final) { { 'full' => '18.04', 'major' => '18', 'minor' => '4' } }
+        let(:value_final) { { 'full' => '18.04', 'major' => '18.04' } }
 
         it 'calls Facter::Resolvers::OsRelease with :name' do
           fact.call_the_resolver
