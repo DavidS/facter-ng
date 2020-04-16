@@ -131,8 +131,6 @@ module Facter
     # @api public
     def reset
       LegacyFacter.reset
-      LegacyFacter.search(*Options.custom_dir)
-      LegacyFacter.search_external(Options.external_dir)
       nil
     end
 
@@ -145,7 +143,7 @@ module Facter
     #
     # @api public
     def search(*dirs)
-      LegacyFacter.search(*dirs)
+      Options[:custom_dir] = dirs
     end
 
     # Registers directories to be searched for external facts.
@@ -156,7 +154,7 @@ module Facter
     #
     # @api public
     def search_external(dirs)
-      LegacyFacter.search_external(dirs)
+      Options[:external_dir] = dirs
     end
 
     # Returns the registered search directories.for external facts.
@@ -165,7 +163,7 @@ module Facter
     #
     # @api public
     def search_external_path
-      LegacyFacter.search_external_path
+      Options[:external_dir]
     end
 
     # Returns the registered search directories for custom facts.
@@ -174,7 +172,7 @@ module Facter
     #
     # @api public
     def search_path
-      LegacyFacter.search_path
+      Options[:custom_dir]
     end
 
     # Gets a hash mapping fact names to their values
